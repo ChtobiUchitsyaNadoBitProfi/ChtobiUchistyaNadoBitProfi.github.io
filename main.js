@@ -193,10 +193,58 @@ class Morse {
         return time;
     }
 
+    updateMainButtons() {
+        document.getElementById("mainButtons").innerHTML = '';
+
+        let myLi = document.createElement('li');
+        myLi.setAttribute('id', 'firstLi');
+        document.getElementById("mainButtons").appendChild(myLi);
+        let myButton = document.createElement('button');
+        myButton = document.createElement('button');
+        myButton.textContent = 'Eng';
+        myButton.setAttribute('type', 'button');
+        myButton.classList.add("myButton");
+        myButton.setAttribute('data-target', '#language');
+        document.getElementById("firstLi").appendChild(myButton);
+
+        myLi = document.createElement('li');
+        myLi.setAttribute('id', 'secondLi');
+        document.getElementById("mainButtons").appendChild(myLi);
+        myButton = document.createElement('button');
+        myButton.textContent = 'Create Random Radiogram';
+        myButton.setAttribute('type', 'button');
+        myButton.classList.add("myButton");
+        myButton.setAttribute('onclick', 'createRadiogram()');
+        document.getElementById("secondLi").appendChild(myButton);
+    }
+
     touchStarted() {
         if (this.audioContext === undefined) {
-            console.info("load context")
             this.createContext();
+
+            this.printKeyboard();
+            this.updateMainButtons()
+
+            //Смена языка клавиатуры
+            const button = document.body.querySelector('[data-target="#language"]');
+            button.addEventListener('click', function() {
+                document.getElementById("radiogramButtons").innerHTML = '';
+                if(button.innerText.toLowerCase() === 'ru') {
+                    document.getElementById('main').innerHTML = '';
+
+                    button.innerText = 'Eng';
+                    morse.lang = 'eng';
+
+                    morse.printKeyboard();
+                } else {
+                    document.getElementById('main').innerHTML = '';
+
+                    button.innerText = 'Ru';
+                    morse.lang = 'ru';
+
+                    morse.printKeyboard();
+                }
+            });
         }
       
         this.generateMorse(this.audioContext.currentTime, this.morseText);
@@ -206,7 +254,7 @@ class Morse {
         this.radiogram = [];
         this.letters = [];
         let randomKey;
-
+        document.getElementById('showMorse').innerHTML = '';
         document.getElementById('main').innerHTML = '';
         if (this.lang == 'eng') {
             for (let i = 0; i < length; i++) {
@@ -256,29 +304,40 @@ class Morse {
             document.getElementById("main").appendChild(newDiv);
         }
 
+        document.getElementById("radiogramButtons").innerHTML = '';
 
         let myButton = document.createElement('button');
-        myButton.textContent = 'Play radiogramm';
+        myButton.textContent = 'Play';
         myButton.setAttribute('type', 'button');
-        myButton.setAttribute('onclick', 'playRadiogram()');
+        myButton.setAttribute('data-target', '#stopPlay');
         myButton.classList.add("myButton");
         document.getElementById("radiogramButtons").appendChild(myButton);
 
-        myButton = document.createElement('button');
-        myButton.textContent = 'Stop';
-        myButton.setAttribute('type', 'button');
-        myButton.classList.add("myButton");
-        myButton.setAttribute('onclick', 'stopRadiogram()');
-        document.getElementById("radiogramButtons").appendChild(myButton);
+        //Старт.Стоп
+        const button = document.body.querySelector('[data-target="#stopPlay"]');
+        button.addEventListener('click', function() {
+            if(button.innerText.toLowerCase() === 'stop') {
+                button.innerText = 'Play';
+                morse.stopRandomRadiogram();
+            } else {
+                button.innerText = 'Stop';
+                morse.playRandomRadiogram();
+            }
+        });
     }
 
-    playRandomRadiogram(time) {
+    playRandomRadiogram() {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
+        let time = this.audioContext.currentTime;
         
         let counter = 0;
         for (var prop in this.radiogram) {
+            if (document.body.querySelector('[data-target="#stopPlay"]').innerHTML == 'Play') {
+                console.log("Stop")
+                break;
+            }
 
             if ((counter / 5) == 0) {
                 this.gain.gain.setValueAtTime(0.0, time);
@@ -301,7 +360,6 @@ class Morse {
 
 //Инициализация
 let morse = new Morse();
-morse.printKeyboard();
 
 //Управление громкостью
 document.getElementById("sound-volume").innerHTML = morse.soundVolume * 100 + '%';
@@ -316,40 +374,8 @@ document.getElementById("sound-rate").innerHTML = morse.rate;
 var rateRange = document.getElementById('rate-range');
 rateRange.onchange = function(){
     morse.rate = this.value;
-    console.info(morse.rate)
     morse.updateDote();
     document.getElementById("sound-rate").innerHTML = morse.rate;
-}
-
-//Смена языка клавиатуры
-const button = document.body.querySelector('[data-target="#language"]');
-button.addEventListener('click', function() {
-    document.getElementById("radiogramButtons").innerHTML = '';
-    if(button.innerText.toLowerCase() === 'ru') {
-        document.getElementById('main').innerHTML = '';
-
-        button.innerText = 'Eng';
-        morse.lang = 'eng';
-
-        morse.printKeyboard();
-    } else {
-        document.getElementById('main').innerHTML = '';
-
-        button.innerText = 'Ru';
-        morse.lang = 'ru';
-
-        morse.printKeyboard();
-    }
-});
-
-function playRadiogram() {
-    morse.playRandomRadiogram(morse.audioContext.currentTime);
-    console.log("paused " + morse.paused);
-}
-
-function stopRadiogram() {
-    morse.stopRandomRadiogram();
-    console.log("paused " + morse.paused);
 }
 
 function createRadiogram() {
@@ -362,7 +388,6 @@ function startMorse() {
 
     document.querySelector('.main').addEventListener('click', e => {
         let content = e.target.innerHTML;
-        console.info(content);
 
         morse.generateMorse(morse.audioContext.currentTime, content);
     });
