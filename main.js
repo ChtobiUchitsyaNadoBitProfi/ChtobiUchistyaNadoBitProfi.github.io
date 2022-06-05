@@ -211,7 +211,7 @@ class Morse {
         myLi.setAttribute('id', 'secondLi');
         document.getElementById("mainButtons").appendChild(myLi);
         myButton = document.createElement('button');
-        myButton.textContent = 'Create Random Radiogram';
+        myButton.textContent = 'Сгенерировать радиограмму';
         myButton.setAttribute('type', 'button');
         myButton.classList.add("myButton");
         myButton.setAttribute('onclick', 'createRadiogram()');
@@ -307,7 +307,7 @@ class Morse {
         document.getElementById("radiogramButtons").innerHTML = '';
 
         let myButton = document.createElement('button');
-        myButton.textContent = 'Play';
+        myButton.textContent = 'Воспроизвести';
         myButton.setAttribute('type', 'button');
         myButton.setAttribute('data-target', '#stopPlay');
         myButton.classList.add("myButton");
@@ -316,11 +316,11 @@ class Morse {
         //Старт.Стоп
         const button = document.body.querySelector('[data-target="#stopPlay"]');
         button.addEventListener('click', function() {
-            if(button.innerText.toLowerCase() === 'stop') {
-                button.innerText = 'Play';
+            if(button.innerText.toLowerCase() === 'остановить') {
+                button.innerText = 'Воспроизвести';
                 morse.stopRandomRadiogram();
             } else {
-                button.innerText = 'Stop';
+                button.innerText = 'Остановить';
                 morse.playRandomRadiogram();
             }
         });
